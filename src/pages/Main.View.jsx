@@ -5,8 +5,8 @@ import { SideBar_Filter } from "../components/SideBar_Filter"
 
 export const Main_Page = () => {
     return (
-        <main className="bg-black px-20 h-screen w-screen">
-            <div className="grid grid-cols-6 grid-rows-10 border-2 border-white text-center h-full">
+        <main className="dark bg-black px-20 h-screen w-screen">
+            <div className="grid grid-cols-6 grid-rows-14 gap-2 text-center h-full">
                 <SideBar_Filter/>
                 <Header_Search/>
                 <List_Characters/>
