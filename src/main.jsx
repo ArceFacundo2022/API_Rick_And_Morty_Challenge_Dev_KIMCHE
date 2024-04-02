@@ -4,10 +4,23 @@ import {NextUIProvider} from '@nextui-org/react'
 import App from './App.jsx'
 import './index.css'
 
+import {HttpLink, ApolloClient, ApolloProvider, InMemoryCache} from '@apollo/client'
+
+const client = new ApolloClient(
+  {
+    cache: new InMemoryCache(),
+    link: new HttpLink({
+      uri: "https://rickandmortyapi.com/graphql"
+    })
+  }
+)
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <NextUIProvider>
-      <App />
-    </NextUIProvider>
+    <ApolloProvider client={client}>
+      <NextUIProvider>
+        <App />
+      </NextUIProvider>
+    </ApolloProvider>
   </React.StrictMode>,
 )
