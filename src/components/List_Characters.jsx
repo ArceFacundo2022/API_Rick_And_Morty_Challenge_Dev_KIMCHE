@@ -4,38 +4,83 @@ import {Spinner, Chip} from "@nextui-org/react";
 import {Card, CardFooter, Image} from "@nextui-org/react";
 import {Modal, ModalContent, ModalHeader, useDisclosure} from "@nextui-org/react";
 
-import { useQuery } from "@apollo/client"
+import { useLazyQuery } from "@apollo/client"
 import { Query } from "../api/main_query"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 export const List_Characters = () => {
 
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const [getCharacters, result] = useLazyQuery(Query.AllCharacters)
 
   const [character, setCharacter] = useState({})
+  const [hasMore, setHasMore] = useState(true)
+  const [infoQuery, setInfoQuery] = useState({
+    characters : [],
+    page: 1
+  })
+  
 
-  const {data, error, loading} = useQuery(Query.AllCharacters())
+  useEffect(()=>{
+    if(result.data){
+      console.log(result?.data.characters.info.next  + ">" + infoQuery.page)
+      if(result?.data.characters.info.next > infoQuery.page || result?.data.characters.info.next == null){
+        setInfoQuery({page: result.data.characters.info.next, characters : infoQuery.characters.concat(result.data.characters.results)})
+      }
+    }
+  },[result])
 
-  if(error) return <section className="row-span-10 col-span-5 rounded-lg border-4 border-black/65 ring-4 ring-green-500 text-red-700 text-2xl">ERROR</section>
+  useEffect(()=>{
+    setTimeout(()=>{
+      getCharacters({variables:{page:1,name:"",status:"Alive",gender:"Male",species:""}})
+    }, 1000)
+  },[])
+
+  const nextPage = () => {
+
+    if(infoQuery.page == null){
+      setHasMore(false)
+    }else{
+      getCharacters({variables:{page:infoQuery.page,name:"",status:"Alive",gender:"Male",species:""}})
+    }
+  }
+
+
+  //if(error) return <section className="row-span-10 col-span-5 rounded-lg border-4 border-black/65 ring-4 ring-green-500 text-red-700 text-2xl">ERROR</section>
+
   return (
     <section className="
-    row-span-10 col-span-5 rounded-lg border-4 border-black/65 ring-4 ring-green-500
-    bg-center bg-cover overflow-auto
-    "
-    style={{"background-image": `url(${PORTAL})`}}>
-        {loading 
-        ? 
-        ( 
-          <div className="flex items-center justify-center text-center w-full h-full">
-            <div className="p-5 rounded-full bg-black/45">
-              <Spinner size="lg" label="Loading..." color="warning" labelColor="warning"/>
-            </div>
-          </div>
-        )
-        :
-        (<>
+      row-span-10 col-span-5 rounded-lg border-4 border-black/65 ring-4 ring-green-500
+      bg-center bg-cover overflow-auto
+      "
+      style={{
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column-reverse',
+        "background-image": `url(${PORTAL})`
+      }}
+      id="section_list_characters">
+        {infoQuery.characters[0] ? (
+          <>
+
+          <InfiniteScroll
+            dataLength={infoQuery.characters.length}
+            inverse={true}
+            next={()=> nextPage()}
+            hasMore={hasMore}
+            loader={
+            <div className="flex items-center justify-center text-center w-full h-full flex-col-reverse">
+              <div className="p-5 rounded-full bg-black/45">
+                <Spinner size="lg" label="Loading..." color="success" labelColor="success"/>
+              </div>
+            </div>}
+            scrollableTarget="section_list_characters"
+          >
+
+          </InfiniteScroll>
           <div className=" grid grid-cols-5 p-2 gap-2">
-            {data.characters.results.map((pj, i) => {
+            {infoQuery.characters.map((pj, i) => {
               return (
                 <a key={i} onClick={() => {
                   setCharacter(pj)
@@ -118,7 +163,16 @@ export const List_Characters = () => {
                 )}}
               </ModalContent>
             </Modal>
-        </>)}
+        </>
+        ): (
+          <>
+            <div className="flex items-center justify-center text-center w-full h-full flex-col-reverse">
+              <div className="p-5 rounded-full bg-black/45">
+                <Spinner size="lg" label="Loading..." color="warning" labelColor="warning"/>
+              </div>
+            </div>
+          </>
+        )}
     </section>
   )
 }
