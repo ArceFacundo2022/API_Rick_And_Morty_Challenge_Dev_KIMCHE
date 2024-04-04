@@ -1,7 +1,8 @@
 # Desafío para Dev
 
-Nombre postulante: [Arce Facundo]
-Link a la app en producción: [En proceso]
+Nombre postulante: Arce Facundo 💻
+
+Link a la app en producción: https://api-rick-and-morty-challenge-dev-kimche.vercel.app
 
 ## Descripcion
 
