@@ -6,16 +6,22 @@ import {Modal, ModalContent, ModalHeader, useDisclosure} from "@nextui-org/react
 
 import { useLazyQuery } from "@apollo/client"
 import { Query } from "../api/main_query"
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { mainContext } from "../hooks/main.hooks";
 
 export const List_Characters = () => {
+
+  const {mainInfo} = useContext(mainContext)
+  const {name, status, gender, species} = mainInfo.filters
 
   const {isOpen, onOpen, onOpenChange} = useDisclosure();
   const [getCharacters, result] = useLazyQuery(Query.AllCharacters)
 
+  const [idTimer, setIdTimer] = useState(false)
   const [character, setCharacter] = useState({})
   const [hasMore, setHasMore] = useState(true)
+  const [notFound, setNotFound] = useState(false)
   const [infoQuery, setInfoQuery] = useState({
     characters : [],
     page: 1
@@ -24,41 +30,74 @@ export const List_Characters = () => {
 
   useEffect(()=>{
     if(result.data){
-      console.log(result?.data.characters.info.next  + ">" + infoQuery.page)
-      if(result?.data.characters.info.next > infoQuery.page || result?.data.characters.info.next == null){
-        setInfoQuery({page: result.data.characters.info.next, characters : infoQuery.characters.concat(result.data.characters.results)})
+      const info = result?.data.characters.info
+      const list = result.data.characters.results
+      if(!list[0]){
+        setNotFound(true)
+        return 
+      }
+      if((info.next > infoQuery.page || info.next === null) || (info.next !== null && infoQuery.page === null)){
+        if(info.next === null){
+          setHasMore(false)
+        }else{
+          if(!hasMore){
+            setHasMore(true)
+          }
+        }
+        setInfoQuery({page: info.next, characters : infoQuery.characters.concat(list)})
+      }
+    }else{
+      if(result.variables.page == 1 && infoQuery[0]){
+        setInfoQuery({page: 1, characters:[]})
       }
     }
   },[result])
 
   useEffect(()=>{
-    setTimeout(()=>{
-      getCharacters({variables:{page:1,name:"",status:"Alive",gender:"Male",species:""}})
-    }, 1000)
-  },[])
+
+    setInfoQuery({page: 1, characters:[]})
+
+    if(idTimer){
+      clearTimeout(idTimer)
+    }
+    
+    const timer = setTimeout(()=>{
+      getCharacters({variables:{
+        page:1,
+        name:name,
+        status:status,
+        gender:gender,
+        species:species
+      }})
+
+    }, 800)
+
+    setIdTimer(timer)
+
+  },[mainInfo])
 
   const nextPage = () => {
 
     if(infoQuery.page == null){
       setHasMore(false)
     }else{
-      getCharacters({variables:{page:infoQuery.page,name:"",status:"Alive",gender:"Male",species:""}})
+      getCharacters({variables:{
+        page:infoQuery.page,
+        name:name,
+        status:status,
+        gender:gender,
+        species:species
+      }})
     }
   }
-
-
-  //if(error) return <section className="row-span-10 col-span-5 rounded-lg border-4 border-black/65 ring-4 ring-green-500 text-red-700 text-2xl">ERROR</section>
 
   return (
     <section className="
       row-span-10 col-span-5 rounded-lg border-4 border-black/65 ring-4 ring-green-500
-      bg-center bg-cover overflow-auto
+      bg-center bg-cover overflow-auto flex-col-reverse flex h-full
       "
       style={{
-        overflow: 'auto',
-        display: 'flex',
-        flexDirection: 'column-reverse',
-        "background-image": `url(${PORTAL})`
+        "backgroundImage": `url(${PORTAL})`
       }}
       id="section_list_characters">
         {infoQuery.characters[0] ? (
@@ -66,7 +105,6 @@ export const List_Characters = () => {
 
           <InfiniteScroll
             dataLength={infoQuery.characters.length}
-            inverse={true}
             next={()=> nextPage()}
             hasMore={hasMore}
             loader={
@@ -76,6 +114,7 @@ export const List_Characters = () => {
               </div>
             </div>}
             scrollableTarget="section_list_characters"
+            scrollThreshold={0.01}
           >
 
           </InfiniteScroll>
@@ -168,7 +207,15 @@ export const List_Characters = () => {
           <>
             <div className="flex items-center justify-center text-center w-full h-full flex-col-reverse">
               <div className="p-5 rounded-full bg-black/45">
-                <Spinner size="lg" label="Loading..." color="warning" labelColor="warning"/>
+                {notFound ?(
+                  <>
+                    <Spinner size="lg" label="Sin resultados" color="danger" labelColor="danger"/>
+                  </>
+                ) : (
+                  <>
+                    <Spinner size="lg" label="Loading..." color="warning" labelColor="warning"/>
+                  </>
+                )}
               </div>
             </div>
           </>

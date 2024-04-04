@@ -6,11 +6,11 @@ function App() {
 
   const initData = {
     filters : {
+      name:"",
       status: "",
       species: "",
       gender: ""
-    },
-    search: ""
+    }
   }
 
   const [mainInfo, mainDispatch] = useReducer(mainReducer, initData)

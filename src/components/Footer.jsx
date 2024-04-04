@@ -1,4 +1,8 @@
 import KIMCHE from "../../public/KIMCHE.png"
+import {Chip} from "@nextui-org/react";
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLinkedin, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 export const Footer = () => {
   return (
@@ -6,6 +10,31 @@ export const Footer = () => {
       <main className="flex">
         <div className="flex-1 h-1/2 text-left p-3">
           <p className="text-white">Desarrollado con ❤ por: <b className="italic text-pretty">Arce Facundo</b>💻</p>
+          <div>
+            <a href="https://www.linkedin.com/in/facundo-sebastian-arce-9699992b8/">
+              <Chip
+                variant="shadow"
+                classNames={{
+                  base: "bg-gradient-to-br from-indigo-700 to-blue-700 hover:from-indigo-500 hover:to-blue-500 border-small border-white/95 shadow-indigo-800/60 cursor-pointer",
+                  content: "drop-shadow shadow-black text-white",
+                }}
+              >
+                <FontAwesomeIcon icon={faLinkedin} />
+              </Chip>
+            </a>
+            <span className="px-0.5" />
+            <a href="https://github.com/ArceFacundo2022" >
+              <Chip
+                variant="shadow"
+                classNames={{
+                  base: "bg-black border-small border-white/95 shadow-black/60 hover:bg-black/80 cursor-pointer",
+                  content: "drop-shadow shadow-black text-white",
+                }}
+              >
+                <FontAwesomeIcon icon={faGithub} />
+              </Chip>
+            </a>
+          </div>
         </div>
         <div className="flex-1 h-1/2 p-3">
           <div className="flex text-center items-center align-middle justify-end">

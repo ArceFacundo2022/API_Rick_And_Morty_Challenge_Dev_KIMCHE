@@ -3,11 +3,10 @@
 export const mainReducer = (state, action) => {
     switch (action.type) {
         case "Filters":
-            return {...state, filters: {...state.filters, [action.name]: [action.value]}}
-        case "Search":
-            return {...state, name: action.name}
+            return {...state, filters: {...state.filters, [action.name]: action.value}}
         case "Reset":
             return {...state, filters : {
+                name: "",
                 status: "",
                 species: "",
                 gender: ""
